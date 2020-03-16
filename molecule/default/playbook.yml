@@ -1,0 +1,21 @@
+---
+- name: Converge
+  hosts: all
+  become: true
+
+  vars:
+    - cron:
+        - name: Once Every Day
+          hour: "0"
+          job: /bin/ls -al /
+
+  roles:
+    - ansible-role-cron
+
+  post_tasks:
+    # Test if the cron entries are present
+    - name: Test Once Every Day
+      shell: /usr/bin/crontab -l
+      register: once_every_day_status
+      failed_when: "'* 0 * * * /bin/ls -al /' not in once_every_day_status.stdout"
+      changed_when: false
